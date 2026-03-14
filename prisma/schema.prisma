@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Poll {
+  id          String   @id @default(uuid())
+  question    String
+  createdAt   DateTime @default(now()) @map("created_at")
+  maxDuration Int?     @map("max_duration")
+
+  answers PollAnswer[]
+  votes   Vote[]
+
+  @@map("polls")
+}
+
+model PollAnswer {
+  id     String @id @default(uuid())
+  pollId String @map("poll_id")
+  answer String
+
+  poll  Poll   @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  votes Vote[]
+
+  @@map("poll_answers")
+}
+
+model Vote {
+  id               String @id @default(uuid())
+  pollId           String @map("poll_id")
+  selectedAnswerId String @map("selected_answer_id")
+
+  poll           Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  selectedAnswer PollAnswer @relation(fields: [selectedAnswerId], references: [id], onDelete: Cascade)
+
+  @@map("votes")
+}
